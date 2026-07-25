@@ -1,0 +1,50 @@
+<resources>
+    <string name="app_name">Расписание</string>
+
+    <!-- Schedule list -->
+    <string name="no_schedules">Нет расписаний\nНажмите + чтобы добавить</string>
+    <string name="add_schedule">Добавить расписание</string>
+    <string name="add_schedule_title">Новое расписание</string>
+    <string name="schedule_name_hint">Название расписания</string>
+    <string name="delete_schedule_title">Удалить расписание?</string>
+    <string name="delete_schedule_message">Расписание «%1$s» и все его уроки будут удалены.</string>
+    <string name="schedule_deleted">Расписание удалено</string>
+
+    <!-- Schedule detail -->
+    <string name="add_lesson">Добавить урок</string>
+    <string name="add_lesson_title">Новый урок</string>
+    <string name="lesson_name_hint">Название урока</string>
+    <string name="start_time_label">Начало</string>
+    <string name="end_time_label">Конец</string>
+    <string name="pick_start_time">Время начала</string>
+    <string name="pick_end_time">Время окончания</string>
+    <string name="no_lessons_for_day">Нет уроков в этот день\nНажмите + чтобы добавить</string>
+    <string name="delete_lesson_title">Удалить урок?</string>
+    <string name="delete_lesson_message">Урок «%1$s» будет удалён.</string>
+    <string name="import_from_file">Импорт из файла</string>
+    <string name="import_success">Уроки импортированы</string>
+    <string name="end_before_start_error">Время окончания должно быть позже начала</string>
+
+    <!-- Common -->
+    <string name="add">Добавить</string>
+    <string name="delete">Удалить</string>
+    <string name="cancel">Отмена</string>
+    <string name="name_cannot_be_empty">Название не может быть пустым</string>
+
+    <!-- Notifications -->
+    <string name="notif_channel_name">Расписание</string>
+    <string name="notif_channel_desc">Уведомления с текущим уроком по расписанию</string>
+    <string name="notif_service_running">Отслеживание расписаний активно</string>
+    <string name="notif_no_lessons_today">Уроков сегодня нет</string>
+
+    <!-- Days of week array -->
+    <string-array name="days_of_week">
+        <item>Пн</item>
+        <item>Вт</item>
+        <item>Ср</item>
+        <item>Чт</item>
+        <item>Пт</item>
+        <item>Сб</item>
+        <item>Вс</item>
+    </string-array>
+</resources>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/scheduleListFragment">
+
+    <fragment
+        android:id="@+id/scheduleListFragment"
+        android:name="com.example.scheduleinnotifications.ui.ScheduleListFragment"
+        android:label="@string/app_name"
+        tools:layout="@layout/fragment_schedule_list">
+
+        <action
+            android:id="@+id/action_scheduleListFragment_to_scheduleDetailFragment"
+            app:destination="@id/scheduleDetailFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/scheduleDetailFragment"
+        android:name="com.example.scheduleinnotifications.ui.ScheduleDetailFragment"
+        android:label="{scheduleName}"
+        tools:layout="@layout/fragment_schedule_detail">
+
+        <argument
+            android:name="scheduleId"
+            app:argType="long" />
+        <argument
+            android:name="scheduleName"
+            app:argType="string" />
+
+    </fragment>
+
+</navigation>
