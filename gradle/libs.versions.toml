@@ -11,6 +11,7 @@ constraintlayout = "2.2.1"
 activityKtx = "1.10.1"
 navigationFragmentKtx = "2.9.0"
 navigationUiKtx = "2.9.0"
+navigationSafeArgs = "2.9.8"
 room = "2.8.4"
 lifecycleViewModel = "2.9.1"
 lifecycleLivedata = "2.9.1"
@@ -38,3 +39,4 @@ androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecy
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+androidx-navigation-safeargs-kotlin = { id = "androidx.navigation.safeargs.kotlin", version.ref = "navigationSafeArgs" }
