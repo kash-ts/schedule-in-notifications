@@ -8,6 +8,7 @@ import com.example.scheduleinnotifications.R
 import com.example.scheduleinnotifications.data.model.Lesson
 import com.example.scheduleinnotifications.data.repository.ScheduleRepository
 import com.example.scheduleinnotifications.ui.MainActivity
+import com.example.scheduleinnotifications.util.DateUtils
 import kotlinx.coroutines.*
 import java.util.*
 
@@ -94,7 +95,7 @@ class ScheduleNotificationService : Service() {
         }
 
         val cal = Calendar.getInstance()
-        val dayOfWeek = calendarDayToLocal(cal.get(Calendar.DAY_OF_WEEK))
+        val dayOfWeek = DateUtils.calendarDayToLocal(cal.get(Calendar.DAY_OF_WEEK))
         val nowMinute = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)
 
         enabledSchedules.forEachIndexed { index, schedule ->
@@ -189,18 +190,6 @@ class ScheduleNotificationService : Service() {
         }
         val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         nm.createNotificationChannel(channel)
-    }
-
-    /** Переводит Calendar.DAY_OF_WEEK (1=вс) → локальный (1=пн…7=вс) */
-    private fun calendarDayToLocal(calDay: Int): Int = when (calDay) {
-        Calendar.MONDAY -> 1
-        Calendar.TUESDAY -> 2
-        Calendar.WEDNESDAY -> 3
-        Calendar.THURSDAY -> 4
-        Calendar.FRIDAY -> 5
-        Calendar.SATURDAY -> 6
-        Calendar.SUNDAY -> 7
-        else -> 1
     }
 
     private fun formatTime(minutes: Int): String {
