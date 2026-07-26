@@ -29,10 +29,15 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "schedule_db"
-                ).build()
+                )
+                    // При смене версии схемы без миграции данные сбрасываются вместо краша.
+                    // Добавить Migration перед релизом, если данные важны.
+                    .fallbackToDestructiveMigration(dropAllTables = false)
+                    .build()
                 INSTANCE = instance
                 instance
             }
         }
+
     }
 }
