@@ -115,14 +115,14 @@
         app:layout_constraintTop_toTopOf="@+id/rv_lessons"
         tools:visibility="visible" />
 
-    <!-- Зафиксированная кнопка "Добавить урок" в правом нижнем углу -->
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+    <!-- Зафиксированная кнопка "Добавить урок" только с иконкой -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_lesson"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="@string/add_lesson"
-        app:icon="@drawable/ic_add"
+        android:contentDescription="@string/add_lesson"
+        app:srcCompat="@drawable/ic_add"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

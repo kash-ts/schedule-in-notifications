@@ -5,6 +5,7 @@
     <string name="no_schedules">Нет расписаний\nНажмите + чтобы добавить</string>
     <string name="add_schedule">Добавить расписание</string>
     <string name="add_schedule_title">Новое расписание</string>
+    <string name="add_schedule_subtitle">Введите название (например: Школа, Тренировки, Работа)</string>
     <string name="schedule_name_hint">Название расписания</string>
     <string name="delete_schedule_title">Удалить расписание?</string>
     <string name="delete_schedule_message">Расписание «%1$s» и все его уроки будут удалены.</string>

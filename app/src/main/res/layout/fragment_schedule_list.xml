@@ -36,14 +36,14 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 
-    <!-- Зафиксированная кнопка "Добавить расписание" в правом нижнем углу -->
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+    <!-- Зафиксированная кнопка "Добавить расписание" только с иконкой -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_schedule"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="@string/add_schedule"
-        app:icon="@drawable/ic_add"
+        android:contentDescription="@string/add_schedule"
+        app:srcCompat="@drawable/ic_add"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
