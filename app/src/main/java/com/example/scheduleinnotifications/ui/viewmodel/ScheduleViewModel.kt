@@ -5,6 +5,7 @@ import androidx.lifecycle.*
 import com.example.scheduleinnotifications.data.model.Lesson
 import com.example.scheduleinnotifications.data.model.Schedule
 import com.example.scheduleinnotifications.data.repository.ScheduleRepository
+import com.example.scheduleinnotifications.util.DateUtils
 import kotlinx.coroutines.launch
 
 class ScheduleViewModel(application: Application) : AndroidViewModel(application) {
@@ -40,9 +41,36 @@ class ScheduleViewModel(application: Application) : AndroidViewModel(application
         _currentScheduleId.value = scheduleId
     }
 
-    val lessonsForCurrentSchedule: LiveData<List<Lesson>> =
+    /** Все уроки текущего расписания (без фильтрации по дню) */
+    private val lessonsForCurrentSchedule: LiveData<List<Lesson>> =
         _currentScheduleId.switchMap { id ->
             repository.getLessonsForScheduleLive(id)
+        }
+
+    /** Выбранный день недели (1 = Пн … 7 = Вс). По умолчанию — сегодня. */
+    private val _selectedDay = MutableLiveData<Int>(DateUtils.todayLocal())
+
+    /** Читаемый доступ к выбранному дню (для использования в диалоге добавления урока) */
+    val selectedDay: LiveData<Int> = _selectedDay
+
+    /** Устанавливает выбранный день и обновляет список уроков */
+    fun selectDay(day: Int) {
+        _selectedDay.value = day
+    }
+
+    /**
+     * Уроки текущего расписания, отфильтрованные по выбранному дню.
+     * Фильтрация выполняется в ViewModel, а не во фрагменте.
+     */
+    val lessonsForCurrentDay: LiveData<List<Lesson>> =
+        MediatorLiveData<List<Lesson>>().apply {
+            fun update() {
+                val all = lessonsForCurrentSchedule.value ?: return
+                val day = _selectedDay.value ?: return
+                value = all.filter { it.dayOfWeek == day }
+            }
+            addSource(lessonsForCurrentSchedule) { update() }
+            addSource(_selectedDay) { update() }
         }
 
     fun addLesson(scheduleId: Long, name: String, dayOfWeek: Int, startMinute: Int, endMinute: Int) =
