@@ -6,7 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
- * Урок/дело в расписании.
+ * Активность в расписании.
  * dayOfWeek: 1=Пн, 2=Вт, 3=Ср, 4=Чт, 5=Пт, 6=Сб, 7=Вс
  * startTime / endTime хранятся в минутах от начала суток (0..1439)
  */

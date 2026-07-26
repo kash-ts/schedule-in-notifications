@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /**
- * Расписание (например: "Школа", "Кружок", "Работа")
+ * Расписание
  */
 @Entity(tableName = "schedules")
 data class Schedule(
