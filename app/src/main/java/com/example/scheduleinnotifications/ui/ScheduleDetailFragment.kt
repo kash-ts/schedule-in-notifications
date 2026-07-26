@@ -5,6 +5,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -12,6 +14,7 @@ import com.example.scheduleinnotifications.R
 import com.example.scheduleinnotifications.databinding.FragmentScheduleDetailBinding
 import com.example.scheduleinnotifications.ui.adapter.LessonAdapter
 import com.example.scheduleinnotifications.ui.viewmodel.ScheduleViewModel
+import com.example.scheduleinnotifications.util.DateUtils
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -22,6 +25,7 @@ import com.google.android.material.timepicker.TimeFormat
 /**
  * Экран деталей расписания.
  * Сверху — чипы дней недели (Пн–Вс), снизу — список уроков для выбранного дня.
+ * Фильтрация по дню выполняется в ScheduleViewModel через lessonsForCurrentDay.
  */
 class ScheduleDetailFragment : Fragment() {
 
@@ -31,8 +35,10 @@ class ScheduleDetailFragment : Fragment() {
     private val viewModel: ScheduleViewModel by activityViewModels()
     private lateinit var lessonAdapter: LessonAdapter
 
-    private var scheduleId: Long = -1L
-    private var selectedDay: Int = 1  // 1=Пн по умолчанию
+    // Аргументы — читаем через SafeArgs (типобезопасно, без хардкода ключей)
+    private val args: ScheduleDetailFragmentArgs by lazy {
+        ScheduleDetailFragmentArgs.fromBundle(requireArguments())
+    }
 
     private val dayLabels get() = resources.getStringArray(R.array.days_of_week).toList()
 
@@ -47,7 +53,7 @@ class ScheduleDetailFragment : Fragment() {
                     ?.bufferedReader()
                     ?.readText()
                     ?: return@let
-                viewModel.importLessonsFromCsv(scheduleId, text)
+                viewModel.importLessonsFromCsv(args.scheduleId, text)
                 Snackbar.make(binding.root, R.string.import_success, Snackbar.LENGTH_SHORT).show()
             }
         }
@@ -64,11 +70,10 @@ class ScheduleDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        scheduleId = arguments?.getLong("scheduleId", -1L) ?: -1L
-        val scheduleName = arguments?.getString("scheduleName") ?: ""
+        setupInsets()
 
         // Заголовок
-        binding.tvScheduleDetailTitle.text = scheduleName
+        binding.tvScheduleDetailTitle.text = args.scheduleName
 
         // Чипы дней недели
         setupDayChips()
@@ -84,9 +89,8 @@ class ScheduleDetailFragment : Fragment() {
         }
         binding.rvLessons.adapter = lessonAdapter
 
-        // Подписка на уроки (фильтрация на UI стороне)
-        viewModel.lessonsForCurrentSchedule.observe(viewLifecycleOwner) { all ->
-            val filtered = all.filter { it.dayOfWeek == selectedDay }
+        // Подписка на уроки — фильтрация по дню выполняется в ViewModel
+        viewModel.lessonsForCurrentDay.observe(viewLifecycleOwner) { filtered ->
             lessonAdapter.submitList(filtered)
             binding.tvNoLessons.isVisible = filtered.isEmpty()
         }
@@ -98,46 +102,45 @@ class ScheduleDetailFragment : Fragment() {
         binding.btnImport.setOnClickListener { openFilePicker() }
     }
 
+    private fun setupInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            val margin16 = (16 * resources.displayMetrics.density).toInt()
+            val padding88 = (88 * resources.displayMetrics.density).toInt()
+            val padding8 = (8 * resources.displayMetrics.density).toInt()
+
+            val fabParams = binding.fabAddLesson.layoutParams as ViewGroup.MarginLayoutParams
+            fabParams.bottomMargin = navBars.bottom + margin16
+            binding.fabAddLesson.layoutParams = fabParams
+
+            binding.rvLessons.setPadding(0, padding8, 0, navBars.bottom + padding88)
+            insets
+        }
+    }
+
     private fun setupDayChips() {
         val chipGroup = binding.chipGroupDays
 
-        // Получаем текущий день недели как начальный выбор
-        val cal = java.util.Calendar.getInstance()
-        val todayLocal = when (cal.get(java.util.Calendar.DAY_OF_WEEK)) {
-            java.util.Calendar.MONDAY -> 1
-            java.util.Calendar.TUESDAY -> 2
-            java.util.Calendar.WEDNESDAY -> 3
-            java.util.Calendar.THURSDAY -> 4
-            java.util.Calendar.FRIDAY -> 5
-            java.util.Calendar.SATURDAY -> 6
-            java.util.Calendar.SUNDAY -> 7
-            else -> 1
-        }
-        selectedDay = todayLocal
+        // Инициируем выбор сегодняшнего дня в ViewModel (DateUtils — единая точка логики)
+        val todayLocal = DateUtils.todayLocal()
+        viewModel.selectDay(todayLocal)
 
         dayLabels.forEachIndexed { index, label ->
             val day = index + 1
             val chip = Chip(requireContext()).apply {
                 text = label
                 isCheckable = true
-                isChecked = (day == selectedDay)
+                isChecked = (day == todayLocal)
                 id = View.generateViewId()
             }
             chip.setOnCheckedChangeListener { _, checked ->
                 if (checked) {
-                    selectedDay = day
-                    refreshLessonList()
+                    // Передаём выбор дня в ViewModel — фрагмент не фильтрует сам
+                    viewModel.selectDay(day)
                 }
             }
             chipGroup.addView(chip)
         }
-    }
-
-    private fun refreshLessonList() {
-        val all = viewModel.lessonsForCurrentSchedule.value ?: emptyList()
-        val filtered = all.filter { it.dayOfWeek == selectedDay }
-        lessonAdapter.submitList(filtered)
-        binding.tvNoLessons.isVisible = filtered.isEmpty()
     }
 
     private fun showAddLessonDialog() {
@@ -188,6 +191,9 @@ class ScheduleDetailFragment : Fragment() {
                 }
         }
 
+        // Берём текущий день из ViewModel — единственный источник истины
+        val currentDay = viewModel.selectedDay.value ?: DateUtils.todayLocal()
+
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.add_lesson_title)
             .setView(dialogView)
@@ -201,7 +207,7 @@ class ScheduleDetailFragment : Fragment() {
                     Snackbar.make(binding.root, R.string.end_before_start_error, Snackbar.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
-                viewModel.addLesson(scheduleId, name, selectedDay, startMinute, endMinute)
+                viewModel.addLesson(args.scheduleId, name, currentDay, startMinute, endMinute)
             }
             .setNegativeButton(R.string.cancel, null)
             .show()

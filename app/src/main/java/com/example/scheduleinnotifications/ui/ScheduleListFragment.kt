@@ -3,6 +3,8 @@ package com.example.scheduleinnotifications.ui
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -38,10 +40,26 @@ class ScheduleListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupInsets()
         setupRecyclerView()
         observeSchedules()
 
         binding.fabAddSchedule.setOnClickListener { showAddScheduleDialog() }
+    }
+
+    private fun setupInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            val margin16 = (16 * resources.displayMetrics.density).toInt()
+            val padding88 = (88 * resources.displayMetrics.density).toInt()
+
+            val fabParams = binding.fabAddSchedule.layoutParams as ViewGroup.MarginLayoutParams
+            fabParams.bottomMargin = navBars.bottom + margin16
+            binding.fabAddSchedule.layoutParams = fabParams
+
+            binding.rvSchedules.setPadding(0, 0, 0, navBars.bottom + padding88)
+            insets
+        }
     }
 
     private fun setupRecyclerView() {
@@ -53,11 +71,11 @@ class ScheduleListFragment : Fragment() {
             onClick = { schedule ->
                 viewModel.selectSchedule(schedule.id)
                 findNavController().navigate(
-                    R.id.action_scheduleListFragment_to_scheduleDetailFragment,
-                    Bundle().apply {
-                        putLong("scheduleId", schedule.id)
-                        putString("scheduleName", schedule.name)
-                    }
+                    ScheduleListFragmentDirections
+                        .actionScheduleListFragmentToScheduleDetailFragment(
+                            scheduleId = schedule.id,
+                            scheduleName = schedule.name
+                        )
                 )
             },
             onDelete = { schedule ->
@@ -84,14 +102,14 @@ class ScheduleListFragment : Fragment() {
     }
 
     private fun showAddScheduleDialog() {
-        val input = TextInputEditText(requireContext()).apply {
-            hint = getString(R.string.schedule_name_hint)
-        }
+        val dialogView = layoutInflater.inflate(R.layout.dialog_add_schedule, null)
+        val etName = dialogView.findViewById<TextInputEditText>(R.id.et_schedule_name)
+
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.add_schedule_title)
-            .setView(input)
+            .setView(dialogView)
             .setPositiveButton(R.string.add) { _, _ ->
-                val name = input.text?.toString()?.trim()
+                val name = etName.text?.toString()?.trim()
                 if (!name.isNullOrBlank()) {
                     viewModel.addSchedule(name)
                 } else {
